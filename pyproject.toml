@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auon"
+version = "0.1.0"
+description = "Alternative Unit-norm momentum-updates by Normalized nonlinear scaling"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "AuON Team"}
+]
+keywords = ["deep-learning", "optimizer", "pytorch", "machine-learning", "LLM"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11", 
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "torch>=2.4.0",
+    "huggingface_hub>=0.21.0",
+    "tqdm>=4.66.0",
+    "matplotlib>=3.8.0",
+    "numpy>=1.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "ruff>=0.3.0",
+]
+
+[project.urls]
+Homepage = "https://ryyzn9.github.io/A-Survey-For-Linear-time-Orthogonal-Optimizer/"
+Repository = "https://github.com/ryyzn9/AuON"
+
+[project.scripts]
+auon-train = "scripts.train:main"
+auon-compare = "scripts.compare_optimizers:main"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "docs*"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

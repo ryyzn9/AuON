@@ -1,49 +1,120 @@
-# History files
-.Rhistory
-.Rapp.history
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Session Data files
-.RData
-.RDataTmp
+# C extensions
+*.so
 
-# User-specific files
-.Ruserdata
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Example code in package build process
-*-Ex.R
+# PyInstaller
+*.manifest
+*.spec
 
-# Output files from R CMD build
-/*.tar.gz
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Output files from R CMD check
-/*.Rcheck/
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytest_cache/
 
-# RStudio files
-.Rproj.user/
+# Translations
+*.mo
+*.pot
 
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
 
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-.httr-oauth
+# pyenv
+.python-version
 
-# knitr and R markdown default cache directories
-*_cache/
-/cache/
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
 
-# Temporary files created by R markdown
-*.utf8.md
-*.knit.md
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
 
-# R Environment Variables
-.Renviron
+# Spyder
+.spyderproject
+.spyproject
 
-# pkgdown site
-docs/
+# Rope
+.ropeproject
 
-# translation temp files
-po/*~
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
-# RStudio Connect folder
-rsconnect/
+# Pyre
+.pyre/
+
+# ruff
+.ruff_cache/
+
+# Data files
+data/
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# Logs
+logs/
+*.log
+
+# Output files
+*.png
+*.jpg
+*.jpeg
+*.pdf
+!docs/*.pdf
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model weights
+checkpoints/
+weights/
