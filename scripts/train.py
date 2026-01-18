@@ -42,7 +42,7 @@ def main():
         "--optimizer",
         type=str,
         default="auon",
-        choices=["auon", "muon"],
+        choices=["auon", "hybrid_auon", "muon"],
         help="Optimizer to use for hidden matrix parameters",
     )
     parser.add_argument(

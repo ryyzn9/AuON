@@ -12,7 +12,7 @@ import torch
 from torch import nn, Tensor
 from tqdm.auto import tqdm
 
-from auon import AuON, Muon, Adam
+from auon import AuON, HybridAuON, Muon, Adam
 from models.gpt import GPT
 from data.fineweb import data_generator
 from .config import Hyperparameters, get_lr, get_window_size_blocks
@@ -54,12 +54,12 @@ def setup_optimizers(
     Set up optimizers for training.
     
     Uses Adam for scalar/embedding/head parameters and the specified
-    optimizer (AuON or Muon) for hidden matrix parameters.
+    optimizer (AuON, HybridAuON, or Muon) for hidden matrix parameters.
     
     Args:
         model: GPT model
         args: Hyperparameters configuration
-        optimizer_type: "auon" or "muon"
+        optimizer_type: "auon", "hybrid_auon", or "muon"
         
     Returns:
         List of optimizers [adam_optimizer, main_optimizer]
@@ -90,6 +90,14 @@ def setup_optimizers(
             momentum=args.auon_momentum,
             weight_decay=args.auon_weight_decay,
         )
+    elif optimizer_type.lower() in ("hybrid_auon", "hybrid"):
+        optimizer2 = HybridAuON(
+            hidden_matrix_params,
+            lr=args.auon_lr,
+            momentum=args.auon_momentum,
+            weight_decay=args.auon_weight_decay,
+            ns_steps=5,
+        )
     elif optimizer_type.lower() == "muon":
         optimizer2 = Muon(
             hidden_matrix_params,
@@ -98,7 +106,8 @@ def setup_optimizers(
             weight_decay=args.muon_weight_decay,
         )
     else:
-        raise ValueError(f"Unknown optimizer type: {optimizer_type}")
+        raise ValueError(f"Unknown optimizer type: {optimizer_type}. "
+                         f"Valid options: 'auon', 'hybrid_auon', 'muon'")
 
     optimizers = [optimizer1, optimizer2]
 

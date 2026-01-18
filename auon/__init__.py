@@ -7,10 +7,10 @@ semi-orthogonal matrices while preserving structure to guide better-aligned
 progress and recondition ill-posed updates.
 """
 
-from .optimizer import AuON
+from .optimizer import AuON, HybridAuON
 from .muon import Muon
 from .adam import Adam
 from .utils import zeropower_via_newtonschulz5
 
 __version__ = "0.1.0"
-__all__ = ["AuON", "Muon", "Adam", "zeropower_via_newtonschulz5"]
+__all__ = ["AuON", "HybridAuON", "Muon", "Adam", "zeropower_via_newtonschulz5"]

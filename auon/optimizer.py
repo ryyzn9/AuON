@@ -3,6 +3,7 @@
 AuON Optimizer: Alternative Unit-norm momentum-updates by Normalized nonlinear scaling.
 
 A linear-time optimizer using cosh-based brake normalization for stable gradient updates.
+Includes both standard AuON and HybridAuON (with Newton-Schulz orthogonalization).
 """
 
 import torch
@@ -100,6 +101,147 @@ class AuON(torch.optim.Optimizer):
                 g_norm = G.norm()
                 if g_norm == 0:
                     continue  # Skip if gradient is zero
+
+                g_normalized = G / (g_norm + 1e-7)
+                g_scaled = g_normalized * gamma
+
+                # Cosh-based scaling: sqrt(mean(cosh(g_scaled)^2))
+                r_scaled = torch.sqrt(torch.mean(torch.cosh(g_scaled) ** 2))
+                
+                # Final update
+                update = G / (r_scaled + 1e-8)
+                p.add_(update, alpha=-lr)
+
+        return loss
+
+
+class HybridAuON(torch.optim.Optimizer):
+    """
+    Hybrid AuON optimizer: Newton-Schulz orthogonalization + cosh-based brake.
+    
+    This optimizer combines the benefits of:
+    1. Newton-Schulz orthogonalization for matrix parameters (like Muon)
+    2. Cosh-based brake normalization for stable updates (AuON)
+    
+    For matrix parameters (ndim >= 2), it applies Newton-Schulz iterations
+    followed by cosh-based normalization. For vector parameters, only the
+    cosh-based brake is applied.
+    
+    Args:
+        params: Iterable of parameters to optimize
+        lr: Learning rate (default: 0.24)
+        momentum: Momentum factor (default: 0.95)
+        weight_decay: Weight decay coefficient (default: 0.0)
+        gamma: Scaling factor for cosh normalization (default: 1.5)
+        ns_steps: Number of Newton-Schulz iterations (default: 5)
+    
+    Example:
+        >>> optimizer = HybridAuON(model.parameters(), lr=0.08, momentum=0.95)
+        >>> optimizer.zero_grad()
+        >>> loss.backward()
+        >>> optimizer.step()
+    """
+    
+    def __init__(
+        self,
+        params,
+        lr: float = 0.24,
+        momentum: float = 0.95,
+        weight_decay: float = 0.0,
+        gamma: float = 1.5,
+        ns_steps: int = 5,
+    ):
+        if lr < 0.0:
+            raise ValueError(f"Invalid learning rate: {lr}")
+        if momentum < 0.0 or momentum > 1.0:
+            raise ValueError(f"Invalid momentum value: {momentum}")
+        if weight_decay < 0.0:
+            raise ValueError(f"Invalid weight_decay value: {weight_decay}")
+            
+        defaults = dict(
+            lr=lr, momentum=momentum, weight_decay=weight_decay,
+            gamma=gamma, ns_steps=ns_steps
+        )
+        super().__init__(params, defaults)
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        """
+        Perform a single optimization step.
+        
+        Args:
+            closure: A closure that reevaluates the model and returns the loss (optional)
+            
+        Returns:
+            Loss value if closure is provided, otherwise None
+        """
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+
+        # Newton-Schulz coefficients (same as Muon)
+        a, b, c = (3.4445, -4.7750, 2.0315)
+
+        for group in self.param_groups:
+            lr = group["lr"]
+            momentum = group["momentum"]
+            wd = group["weight_decay"]
+            gamma = group["gamma"]
+            ns_steps = group["ns_steps"]
+
+            for p in group["params"]:
+                if p.grad is None:
+                    continue
+
+                grad = p.grad
+                state = self.state[p]
+
+                # Initialize momentum buffer
+                if "momentum_buffer" not in state:
+                    state["momentum_buffer"] = torch.zeros_like(grad)
+
+                m = state["momentum_buffer"]
+
+                # Decoupled weight decay
+                if wd != 0:
+                    eff_weight_decay = lr * wd * getattr(p, "wd_mul", 1.0)
+                    p.mul_(1 - eff_weight_decay)
+
+                # Momentum update
+                m.lerp_(grad, 1 - momentum)
+                grad = grad.lerp_(m, momentum)
+
+                G = grad
+
+                # --- Newton-Schulz orthogonalization (Hybrid-AuON style) ---
+                # Only for matrix-like tensors (ndim >= 2); others skip NS.
+                if G.ndim >= 2:
+                    X = G
+                    # Work with "tall" shape: (#rows <= #cols)
+                    transposed = False
+                    if X.size(-2) > X.size(-1):
+                        X = X.mT
+                        transposed = True
+
+                    # Normalize over the last two dims
+                    X = X / (X.norm(dim=(-2, -1), keepdim=True) + 1e-7)
+
+                    # Newton-Schulz iterations
+                    for _ in range(ns_steps):
+                        A = X @ X.mT
+                        B = b * A + c * (A @ A)
+                        X = a * X + B @ X
+
+                    if transposed:
+                        X = X.mT
+
+                    G = X
+
+                # --- AuON cosh-based brake on the (possibly NS-shaped) update ---
+                g_norm = G.norm()
+                if g_norm == 0:
+                    continue  # nothing to do if update is zero
 
                 g_normalized = G / (g_norm + 1e-7)
                 g_scaled = g_normalized * gamma
