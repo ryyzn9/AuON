@@ -4,7 +4,7 @@
 
 A linear-time optimizer that achieves remarkable performance without producing semi-orthogonal matrices while preserving structure to guide better-aligned progress and recondition ill-posed updates.
 
-📄 **Paper**: [A Survey For Linear-time Orthogonal Optimizer](https://ryyzn9.github.io/A-Survey-For-Linear-time-Orthogonal-Optimizer/)
+📄 **Paper**: [A Survey For Linear-time Orthogonal Optimizer](https://arxiv.org/abs/2509.24320)
 
 ## Features
 
@@ -127,10 +127,11 @@ param -= lr * update
 
 ```bibtex
 @misc{auon2024,
-  title={AuON: Alternative Unit-norm momentum-updates by Normalized nonlinear scaling},
-  author={AuON Team},
-  year={2024},
-  url={https://ryyzn9.github.io/A-Survey-For-Linear-time-Orthogonal-Optimizer/}
+  title={AuON: A Linear-time Alternative to Orthogonal Momentum Updates
+},
+  author={Dipan Maity},
+  year={2025},
+  url={https://arxiv.org/abs/2509.24320/}
 }
 ```
 
